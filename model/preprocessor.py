@@ -3,38 +3,48 @@
 # Import libraries
 import pandas as pd
 import numpy as np
+from config import DATA
+# import spacy
+# from spacy.lang.en.stop_words import STOP_WORDS
+# import os
+# import string
+
+# # Download (large) English Pipeline from spacy
+# !python -m spacy download en_core_web_lg
+
 
 # load the data
-data = pd.read_csv("./data/hcV3-stories.csv", sep=";")
-data.head()
+def load_data():
+    return pd.read_csv(DATA, sep= ";")
 
-# Missing Values Treatment
-data.isnull().sum()
-print(data.isnull().sum())
-data['annotatorAge'] = data['annotatorAge'].fillna(data['annotatorAge'].mean())
-data['frequency'] = data['frequency'].fillna(data['frequency'].mean())
-data['importance'] = data['importance'].fillna(data['importance'].mean())
+data = load_data()
 
-# For our two important feartures let's drop the missing rows.
-data = data.dropna(subset = ['story', 'memType'])
-data[['story', 'memType']].isnull().sum()
+#uncomment below print if you want to display the first 3 rows in terminal
+#print(data.head(3))
 
-# Preprocessing
+def missing_value():
+    global data
+    # Missing Values Treatment
+    data['annotatorAge'] = data['annotatorAge'].fillna(data['annotatorAge'].mean())
+    data['frequency'] = data['frequency'].fillna(data['frequency'].mean())
+    data['importance'] = data['importance'].fillna(data['importance'].mean())
+    # For our two important feartures let's drop the missing rows. 
+    data = data.dropna(subset = ['story', 'memType'])
+    return data
 
-import spacy
-from spacy.lang.en.stop_words import STOP_WORDS
-import string
+data = missing_value()
 
-# Load Spacy's English language model
-# Download (large) English Pipeline from spacy
-!python -m spacy download en_core_web_lg
-nlp = spacy.load("en_core_web_lg")
+#uncomment below print if you want to display the first 3 rows in terminal
+#print(data.head(3))
 
-# Create a list of the story per participant
-docs = []
-
-for doc in nlp.pipe(data['story'], n_process=os.cpu_count()-1, batch_size=200, disable = ["transformer", "ner", "textcat"]):
-    docs.append(doc)
+# Define a function to    
+def story_list():
+    nlp = spacy.load("en_core_web_lg")
+    # Create a list of the story per participant
+    docs = []
+    for doc in nlp.pipe(data['story'], n_process=os.cpu_count()-1, batch_size=200, disable = ["transformer", "ner", "textcat"]):
+        docs.append(doc)
+    return docs
 
 
 # Define a function to lemmatize content words
@@ -48,15 +58,21 @@ def preprocess_text(doc):
 # Apply the preprocessing pipeline using nlp.pipe
 clean_tokens = []
 clean_text = []
+docs = story_list()
 
-for doc in docs:
-    tokens, text = preprocess_text(doc)
-    clean_tokens.append(tokens)
-    clean_text.append(text)
+def preprocess_pipeline():
+    for doc in docs:
+        tokens, text = preprocess_text(doc)
+        clean_tokens.append(tokens)
+        clean_text.append(text)
+    return clean_tokens, clean_text
+    
+clean_tokens, clean_text = preprocess_pipeline()
 
 # Add the preprocessed text as a new column in the dataframe
 data['story_preprocessed_text'] = clean_text
 data['story_preprocessed_token'] = clean_tokens
+
 
 all_tokens = [token for tokens in clean_tokens for token in tokens]
 unique_tokens = set(all_tokens)
@@ -65,11 +81,6 @@ unique_tokens = set(all_tokens)
 
 # Number of words per story:
 data['word_count'] = [len(text.split()) for text in data['story_preprocessed']]
-
-# Compute the minimum, maximum, average and std number of word for all the stories
-print('All stories in Hippocorpus')
-print()
-data['word_count'].describe()
 
 # split real and imagined stories
 data_recalled = data[data['memType']=='recalled']

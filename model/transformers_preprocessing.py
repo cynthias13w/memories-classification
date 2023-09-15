@@ -3,15 +3,13 @@
 # !pip install evaluate
 # !pip install accelerate -U
 # !pip install transformers[torch]
-
+from transformers import DistilBertTokenizerFast
 # 1. Load Data
-from datasets import Dataset
+#from datasets import Dataset
 from data import load_dataframe
 
 # Firstly load dataframe
 data = load_dataframe()
-
-#dataset2= load_my_dataset()
 
 # load Dataset
 dataset = Dataset.from_pandas(data[['story', 'memType']])
@@ -22,20 +20,13 @@ dataset = dataset.rename_column('story', 'text')
 # label2id = {"imagined":0, "recalled": 1, "retold":2}
 
 # 2. Preprocessing
-from transformers import AutoTokenizer, DistilBertTokenizerFast
-
-# create an instance of tokenizer
-tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased") 
-
-# define a function to tokinize the dataset
-def tokensizer_function(dataset):
+def tokenizer_function(dataset):
     """
     Args:
         dataset: Sequence of string to tokenize
     """
+    tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased")
     return tokenizer(dataset['text'], padding='max_length', truncation=True)
 
-# Apply the function to the datasets
-tokenized_dataset = dataset.map(tokensizer_function, batched = True)
-
-
+def tokenize_data(data):
+    return data.map(tokenizer_function, batched = True)

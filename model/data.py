@@ -23,3 +23,4 @@ def import_data(file_path):
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         return None
+      

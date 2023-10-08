@@ -1,24 +1,17 @@
 from transformers import AutoTokenizer, DataCollatorWithPadding
-#DistilBertTokenizerFast
-
-# 1. Load Data
 from datasets import Dataset
-from data import load_dataframe
-
-# Firstly load dataframe
+from data import import_data
+from config import PATH_TO_DATA
 
 def clean_df():
-    data = load_dataframe()
+    data = import_data(PATH_TO_DATA)
 
     # Drop missing values
     data = data.dropna(subset=['story', 'memType'])
-
+    print(data)
     # load Dataset
     dataset = Dataset.from_pandas(data[['story', 'memType']])
     return dataset
-
-# id2label = {0: "imagined", 1: "recalled", 2:"retold"}
-# label2id = {"imagined":0, "recalled": 1, "retold":2}
 
 # 2. Preprocessing
 def tokenizer_function(dataset):
@@ -36,3 +29,9 @@ def padding(tokenizer):
     """Returns data collator object
     """
     return DataCollatorWithPadding(tokenizer=tokenizer)
+
+if __name__ == '__main__':
+    clean_dataset = clean_df()
+    tokenized = tokenize_data(clean_dataset)
+    padded_data = padding(tokenized)
+    print(padded_data)

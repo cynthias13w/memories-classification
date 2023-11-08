@@ -1,11 +1,7 @@
 from fastapi import FastAPI, File
 from fastapi.middleware.cors import CORSMiddleware
 from memories.dl_logic.model import initialize_model, predict
-'''
-Please provide the correct model initialization function (initialize_model).
-Additionally, create a predict function that will return the endpoint for the FAST API.
-'''
-from dl_logic.transformers_preprocessing import clean_df, tokenize_data, padding
+from memories.dl_logic.transformers_preprocessing import clean_df, tokenize_data, padding
 from pydantic import BaseModel
 
 app = FastAPI()

@@ -7,3 +7,6 @@ requests
 uvicorn
 protobuf==3.19.6
 python-multipart
+colorama
+transformers
+datasets

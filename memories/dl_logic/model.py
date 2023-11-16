@@ -134,3 +134,10 @@ def train_model(
         print(f"An error occurred during training: {str(e)}")
 
     return trainer
+
+
+def predict(
+    model,
+    padded_data
+):
+    return model.predict(padded_data)
